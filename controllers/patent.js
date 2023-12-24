@@ -1,4 +1,8 @@
-const { getAllPatents, getAllPatentIds } = require("../models/patent");
+const {
+  getAllPatents,
+  getAllPatentIds,
+  getCountByPhasePerYear,
+} = require("../models/patent");
 const {
   patentIdSchema,
   getAllQuerySchema,
@@ -67,7 +71,23 @@ async function getPatentIds(req, res) {
   }
 }
 
+async function getCount(req, res) {
+  let resStatus = 200;
+  let patentList = {};
+  try {
+    patentList = await getCountByPhasePerYear();
+  } catch (error) {
+    console.error(`Error: ${error.message}`);
+    resStatus = 500;
+    //return res.status(resStatus).json({ error: "Internal Server Error" });
+  } finally {
+    return res.status(resStatus).json(patentList);
+    //return patentList;
+  }
+}
+
 module.exports = {
   patent,
   getPatentIds,
+  getCount,
 };

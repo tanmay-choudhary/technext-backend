@@ -4,7 +4,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors"); // Import the cors middleware
 const patent = require("./routes/patent");
 const app = express();
-const port = 3001;
+const port = 3002;
 
 app.use(cors());
 app.use(express.json());

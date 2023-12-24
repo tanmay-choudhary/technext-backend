@@ -13,7 +13,7 @@ exports.generateWhereClause = ({
       .join(" OR ");
     conditions.push(`(${jobIdConditions})`);
   }
-  if (patent_id_arr) {
+  if (patent_id_arr?.length) {
     const patent_id_Conditions = patent_id_arr
       .map((id) => `patent_id = '${id}'`)
       .join(" OR ");

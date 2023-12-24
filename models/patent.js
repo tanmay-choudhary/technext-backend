@@ -29,45 +29,50 @@ async function getAllPatentIds({ patentId }) {
     throw error;
   }
 }
-async function getAllPatentByIds({ patentId }) {
+async function getCountByPhasePerYear() {
   try {
-    const query = `SELECT DISTINCT patent_id FROM test_data WHERE patent_id ILIKE '${patentId}%' LIMIT 5;`;
+    const query = `
+   select 
+count(phase) as total_phase,
+sum(
+case 
+	when phase = 'Phase I' then 1 else 0
+end
+) as "Phase I Count", 
+sum(
+case 
+	when phase = 'Phase II' then 1 else 0
+end
+) as "Phase II Count", 
+to_char("date"::date, 'YYYY') from test_data 
+where phase = 'Phase I' or phase = 'Phase II'
+group by to_char("date"::date, 'YYYY');
+
+    `;
+
+    // 'invalid input syntax for type date: "Date"'
     const result = await pool.query(query);
-    let final = result.rows.map((row) => row.patent_id);
-    return final;
-  } catch (error) {
-    console.error("Error retrieving unique patent IDs:", error);
-    throw error;
-  }
-}
-async function getVideoByIdModel(videoId) {
-  try {
-    const query = "SELECT * FROM melon_videos WHERE video_id = $1";
-    const values = [videoId];
-    const result = await pool.query(query, values);
-    return result.rows[0]; // Assuming there's only one video with the given ID
-  } catch (error) {
-    console.error(`Error retrieving video with ID ${videoId}:`, error);
-    throw error;
-  }
-}
-
-async function getVideosByIdsModel(videoIds) {
-  try {
-    const query = "SELECT * FROM melon_videos WHERE video_id = ANY($1)";
-    const values = [videoIds];
-    const result = await pool.query(query, values);
-    return result.rows; // Returning an array of videos
-  } catch (error) {
-    console.error(
-      `Error retrieving videos with IDs ${videoIds.join(", ")}:`,
-      error
+    const outputObject = {};
+    let data = result.rows;
+    const years = data.map((entry) => entry.to_char).sort();
+    const phaseICounts = data.map((entry) => parseInt(entry["Phase I Count"]));
+    const phaseIICounts = data.map((entry) =>
+      parseInt(entry["Phase II Count"])
     );
+    const totalPhaseCounts = data.map((entry) => parseInt(entry.total_phase));
+    return {
+      years: years,
+      phaseICounts: phaseICounts,
+      phaseIICounts: phaseIICounts,
+      totalPhaseCounts: totalPhaseCounts,
+    };
+  } catch (error) {
+    console.error("Error retrieving count by phase per year:", error);
     throw error;
   }
 }
-
 module.exports = {
   getAllPatents,
   getAllPatentIds,
+  getCountByPhasePerYear,
 };
