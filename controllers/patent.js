@@ -2,6 +2,8 @@ const {
   getAllPatents,
   getAllPatentIds,
   getCountByPhasePerYear,
+  deletePatentById,
+  updatePatentById,
 } = require("../models/patent");
 const {
   patentIdSchema,
@@ -86,8 +88,44 @@ async function getCount(req, res) {
   }
 }
 
+async function deletePatent(req, res) {
+  let resStatus = 200;
+  let resp = {};
+  try {
+    let patentId = req.body.patent_id;
+    resp = await deletePatentById(patentId);
+  } catch (error) {
+    console.error(`Error: ${error.message}`);
+    resStatus = 500;
+    //return res.status(resStatus).json({ error: "Internal Server Error" });
+  } finally {
+    return res.status(resStatus).json(resp);
+    //return patentList;
+  }
+}
+
+async function updatePatent(req, res) {
+  let resStatus = 200;
+  let resp = {};
+
+  try {
+    const { patent_id, phase, patent_text } = req.body;
+
+    // Assuming updatePatentById is an async function that updates the patent
+    resp = await updatePatentById(patent_id, { phase, patent_text });
+  } catch (error) {
+    console.error(`Error: ${error.message}`);
+    resStatus = 500;
+    resp = { error: "Internal Server Error" };
+  } finally {
+    return res.status(resStatus).json(resp);
+  }
+}
+
 module.exports = {
   patent,
   getPatentIds,
   getCount,
+  deletePatent,
+  updatePatent,
 };

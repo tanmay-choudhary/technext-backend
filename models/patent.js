@@ -71,8 +71,54 @@ group by to_char("date"::date, 'YYYY');
     throw error;
   }
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
+async function deletePatentById(patentId) {
+  try {
+    const query = `DELETE FROM test_data WHERE patent_id = '${patentId}';`;
+    const result = await pool.query(query);
+    // You can check the result if needed
+    return result;
+  } catch (error) {
+    console.error(`Error deleting patent with ID ${patentId}:`, error);
+    throw error;
+  }
+}
+async function updatePatentById(patentId, newData) {
+  try {
+    // Assuming 'newData' is an object with fields you want to update
+    const { patent_text, phase } = newData;
+
+    const query = `
+      UPDATE test_data
+SET
+  patent_text = $1,
+  phase = $2
+WHERE patent_id = $3
+RETURNING *;
+`;
+
+    const values = [patent_text, phase, patentId]; // Corrected order of values
+
+    const result = await pool.query(query, values);
+
+    // Check if the update was successful and return the updated data
+    if (result.rows.length > 0) {
+      return result.rows[0];
+    } else {
+      throw new Error(`Patent with ID ${patentId} not found`);
+    }
+  } catch (error) {
+    console.error(`Error updating patent: ${error.message}`);
+    throw error;
+  }
+}
+
 module.exports = {
   getAllPatents,
   getAllPatentIds,
   getCountByPhasePerYear,
+  deletePatentById,
+  updatePatentById,
 };
