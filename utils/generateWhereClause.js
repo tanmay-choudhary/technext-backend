@@ -9,7 +9,7 @@ exports.generateWhereClause = ({
   if (patent_id) {
     let jobIdArray = patent_id.split(",");
     const jobIdConditions = jobIdArray
-      .map((id) => `patent_id = '${id}'`)
+      .map((id) => `patent_id ILIKE '%${id}%'`)
       .join(" OR ");
     conditions.push(`(${jobIdConditions})`);
   }
