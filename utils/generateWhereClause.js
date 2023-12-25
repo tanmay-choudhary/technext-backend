@@ -15,7 +15,7 @@ exports.generateWhereClause = ({
   }
   if (patent_id_arr?.length) {
     const patent_id_Conditions = patent_id_arr
-      .map((id) => `patent_id = '${id}'`)
+      .map((id) => `patent_id ILIKE '%${id}%' `)
       .join(" OR ");
     conditions.push(`(${patent_id_Conditions})`);
   }
